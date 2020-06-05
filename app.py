@@ -31,18 +31,19 @@ def predict(file):
     image = np.average(image, axis=2)
     image /= 255
     dimension = image_size[0] * image_size[1]
-    image = image.reshape(image.shape[0], dimension)
+    image = image.reshape(1, dimension)
     array = model.predict(image)
     result = array[0]
-    answer = np.argmax(result)
-    if answer == 0:
-        print("Label: Normal")
-    elif answer == 1:
-        print("Label: Dry")
-    elif answer == 2:
-        print("Label: Oily")
-    return answer
+    prob = model.predict_proba(image)
 
+    if result == 0:
+        print("Label: Normal")
+    elif result == 1:
+        print("Label: Dry")
+    elif result == 2:
+        print("Label: Oily")
+    return result
+    return prob
 
 def my_random_string(string_length=10):
     """Returns a random string of length string_length."""
@@ -63,7 +64,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route("/")
 def template_test():
-    return render_template('template.html', label='',
+    return render_template('template.html', label=' ', prob=' ',
                            imagesource='/Users/ChristieFung/Desktop/Insight/skin_care_scraper-2/uploads/template.jpg')
 
 
@@ -79,22 +80,34 @@ def upload_file():
 
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
-            result = model.predict(file_path)
-            final = np.argmax(result)
-            if final == 0:
-                label: 'Normal'
-            elif final == 1:
-                label: 'Dry'
-            elif final == 2:
-                label: 'Oily'
+            image_size = (64, 64)
+            image = np.asarray(Image.open(file).resize(image_size))
+            image = np.average(image, axis=2)
+            image /= 255
+            dimension = image_size[0] * image_size[1]
+            image = image.reshape(1, dimension)
+            array = model.predict(image)
+            result = array[0]
+            prob = model.predict_proba(image)
+#            result = model.predict(file_path)
+
+            if result == 0:
+                label = 'Normal'
+            elif result == 1:
+                label ='Dry'
+            elif result == 2:
+                label = 'Oily'
+
             print(result)
+            print(prob)
             print(file_path)
             filename = my_random_string(6) + filename
 
             os.rename(file_path, os.path.join(app.config['UPLOAD_FOLDER'], filename))
             print("--- %s seconds ---" % str(time.time() - start_time))
-            # return render_template('template.html', label=label, imagesource='../uploads/' + filename)
-            return render_template('template.html', label=label, imagesource='../uploads/' + filename)
+            return render_template('template.html', label = label, prob = prob, imagesource='../uploads/' + filename)
+           # return redirect('/')
+          #  return render_template('template.html', label=label, imagesource='../uploads/' + filename)
 
 
 from flask import send_from_directory

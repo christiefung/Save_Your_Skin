@@ -6,7 +6,7 @@
 <div class="row">
 
   <div class="col-md-7">
-    <h1>Save Your Skin - skin type classification</h1>
+    <h1>Save Your Skin - skin type classification & product recommendation</h1>
 	<h2>Upload a face image</h2>
     <br>
     <form action="" method=post enctype=multipart/form-data>
@@ -20,6 +20,7 @@
         <tr>
           <th>Image</th>
           <th>Prediction</th>
+           <th>Pr. of normal, dry, oily skin type</th>
         </tr>
 		<tr>
           {% block content %}{% endblock %}
