@@ -34,7 +34,8 @@ def predict(file):
     image = image.reshape(1, dimension)
     array = model.predict(image)
     result = array[0]
-    prob = model.predict_proba(image)
+#    prob = model.predict_proba(image)
+#    prob = model.predict(image)
 
     if result == 0:
         print("Label: Normal")
@@ -43,7 +44,7 @@ def predict(file):
     elif result == 2:
         print("Label: Oily")
     return result
-    return prob
+#    return prob
 
 def my_random_string(string_length=10):
     """Returns a random string of length string_length."""
@@ -51,7 +52,6 @@ def my_random_string(string_length=10):
     random = random.upper()  # Make all characters uppercase.
     random = random.replace("-", "")  # Remove the UUID '-'.
     return random[0:string_length]  # Return the random string.
-
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -64,8 +64,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route("/")
 def template_test():
-    return render_template('template.html', label=' ', prob=' ',
-                           imagesource='/Users/ChristieFung/Desktop/Insight/skin_care_scraper-2/uploads/template.jpg')
+    return render_template('template.html', label=' ',
+                           imagesource='/Users/ChristieFung/Documents/Save_Your_Skin/uploads/template.jpg')
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -88,7 +88,8 @@ def upload_file():
             image = image.reshape(1, dimension)
             array = model.predict(image)
             result = array[0]
-            prob = model.predict_proba(image)
+#            prob = model.predict_proba(image)
+ #           prob = model.predict(image)
 #            result = model.predict(file_path)
 
             if result == 0:
@@ -99,16 +100,14 @@ def upload_file():
                 label = 'Oily'
 
             print(result)
-            print(prob)
+#            print(prob)
             print(file_path)
             filename = my_random_string(6) + filename
 
             os.rename(file_path, os.path.join(app.config['UPLOAD_FOLDER'], filename))
             print("--- %s seconds ---" % str(time.time() - start_time))
-            return render_template('template.html', label = label, prob = prob, imagesource='../uploads/' + filename)
-           # return redirect('/')
-          #  return render_template('template.html', label=label, imagesource='../uploads/' + filename)
-
+#            return render_template('template.html', label = label, prob = prob, imagesource='../uploads/' + filename)
+            return render_template('template.html', label=label, imagesource='../uploads/' + filename)
 
 from flask import send_from_directory
 
@@ -120,5 +119,5 @@ def uploaded_file(filename):
 
 
 if __name__ == "__main__":
-    app.debug = False
+    app.debug = True
     app.run()
