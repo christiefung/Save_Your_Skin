@@ -1,17 +1,17 @@
 import os
-import requests
-from PIL import Image
-from flask import Flask, render_template, request, redirect, flash
 from werkzeug.utils import secure_filename
-import numpy as np
-import pickle
 import uuid
 import base64
+import requests
+from flask import Flask, render_template, request, redirect, flash
+from werkzeug.utils import secure_filename
+import tensorflow as tf
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+import imutils
+import numpy as np
 
-fn = 'lr_skin_classification'
-model_dir = '/Users/ChristieFung/Desktop/Insight/skin_care_scraper-2/models'
-with open('%s/%s.pkl' % (model_dir, fn), 'rb') as f:
-    model = pickle.load(f)
+model = tf.keras.models.load_model('/Users/ChristieFung/Desktop/Insight/skin_care_scraper-2/models/model.h5')
 
 UPLOAD_FOLDER = '/Users/ChristieFung/Desktop/Insight/skin_care_scraper-2/uploads'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
@@ -20,31 +20,27 @@ ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
 def get_as_base64(url):
     return base64.b64encode(requests.get(url).content)
 
-
 # @app.route('/')
 # def index():
 #    return render_template('index.html')
 
 def predict(file):
-    image_size = (64, 64)
-    image = np.asarray(Image.open(file).resize(image_size))
-    image = np.average(image, axis=2)
-    image /= 255
-    dimension = image_size[0] * image_size[1]
-    image = image.reshape(1, dimension)
-    array = model.predict(image)
-    result = array[0]
-#    prob = model.predict_proba(image)
-#    prob = model.predict(image)
+    x = load_img(file, target_size=(224, 224))
 
-    if result == 0:
-        print("Label: Normal")
-    elif result == 1:
+    x = img_to_array(x)
+    x = np.expand_dims(x, axis=0)
+#    images = np.vstack([x])
+    array = model.predict(x)
+    result = array[0]
+    answer = np.argmax(result)
+    if answer == 0:
         print("Label: Dry")
-    elif result == 2:
+    elif answer == 1:
+        print("Label: Normal")
+    elif answer == 2:
         print("Label: Oily")
-    return result
-#    return prob
+    return answer
+
 
 def my_random_string(string_length=10):
     """Returns a random string of length string_length."""
@@ -52,6 +48,7 @@ def my_random_string(string_length=10):
     random = random.upper()  # Make all characters uppercase.
     random = random.replace("-", "")  # Remove the UUID '-'.
     return random[0:string_length]  # Return the random string.
+
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -64,8 +61,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route("/")
 def template_test():
-    return render_template('template.html', label=' ',
-                           imagesource='/Users/ChristieFung/Documents/Save_Your_Skin/uploads/template.jpg')
+    return render_template('template.html', label='',
+                           imagesource='/Users/ChristieFung/Desktop/Insight/skin_care_scraper-2/uploads/template.jpg')
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -80,34 +77,22 @@ def upload_file():
 
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
-            image_size = (64, 64)
-            image = np.asarray(Image.open(file).resize(image_size))
-            image = np.average(image, axis=2)
-            image /= 255
-            dimension = image_size[0] * image_size[1]
-            image = image.reshape(1, dimension)
-            array = model.predict(image)
-            result = array[0]
-#            prob = model.predict_proba(image)
- #           prob = model.predict(image)
-#            result = model.predict(file_path)
-
+            result = predict(file_path)
             if result == 0:
-                label = 'Normal'
+                label = 'Dry'
             elif result == 1:
-                label ='Dry'
+                label = 'Normal'
             elif result == 2:
                 label = 'Oily'
-
             print(result)
-#            print(prob)
             print(file_path)
             filename = my_random_string(6) + filename
 
             os.rename(file_path, os.path.join(app.config['UPLOAD_FOLDER'], filename))
             print("--- %s seconds ---" % str(time.time() - start_time))
-#            return render_template('template.html', label = label, prob = prob, imagesource='../uploads/' + filename)
+            # return render_template('template.html', label=label, imagesource='../uploads/' + filename)
             return render_template('template.html', label=label, imagesource='../uploads/' + filename)
+
 
 from flask import send_from_directory
 
