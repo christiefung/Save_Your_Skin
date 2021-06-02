@@ -167,7 +167,7 @@ tqdm==4.46.0
 traitlets==4.3.3
 Twisted==20.3.0
 tzlocal==2.1
-urllib3==1.25.9
+urllib3==1.26.5
 validators==0.15.0
 virtualenv==20.0.23
 w3lib==1.22.0
