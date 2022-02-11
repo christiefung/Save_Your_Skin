@@ -165,7 +165,7 @@ torchvision==0.6.0
 tornado==5.1.1
 tqdm==4.46.0
 traitlets==4.3.3
-Twisted==20.3.0
+Twisted==22.1.0
 tzlocal==2.1
 urllib3==1.25.9
 validators==0.15.0
