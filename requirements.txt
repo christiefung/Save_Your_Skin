@@ -138,7 +138,7 @@ s3transfer==0.3.3
 scikit-image==0.17.2
 scikit-learn==0.22.2.post1
 scipy==1.4.1
-Scrapy==2.1.0
+Scrapy==2.6.1
 seaborn==0.10.1
 selectorlib==0.16.0
 selenium==3.14.0
