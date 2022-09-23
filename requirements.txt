@@ -105,7 +105,7 @@ pinterest-api==0.0.8
 prometheus-client==0.7.1
 prompt-toolkit==3.0.5
 Protego==0.1.16
-protobuf==3.12.2
+protobuf==3.18.3
 psycopg2==2.8.5
 psycopg2-binary==2.8.5
 ptyprocess==0.6.0
